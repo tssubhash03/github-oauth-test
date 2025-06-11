@@ -11,7 +11,7 @@
       const code = params.get("code");
 
       if (code) {
-        fetch("http://localhost:4000/exchange-code", {
+        fetch("https://62a8-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code }),
