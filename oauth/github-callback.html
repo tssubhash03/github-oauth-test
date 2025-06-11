@@ -1,25 +1,27 @@
-<!DOCTYPE html>
-<html>
-  <head><title>GitHub Callback</title></head>
-  <body>
-    <h2>Processing GitHub Token...</h2>
-    <script>
-      // Simulate a token from backend
-      const fakeToken = "gho_test_fake_token_123";
+const params = new URLSearchParams(window.location.search);
+const code = params.get("code");
 
-      // ✅ Send token to extension popup
-      if (window.opener) {
-        window.opener.postMessage(
-          {
-            type: "GITHUB_OAUTH_SUCCESS",
-            token: fakeToken
-          },
-          "https://tssubhash03.github.io"
-        );
-        setTimeout(() => window.close(), 1500);
-      } else {
-        document.body.innerHTML = "<h2>❌ No opener window</h2>";
-      }
-    </script>
-  </body>
-</html>
+if (code) {
+  fetch("https://your-ngrok-server.ngrok-free.app/exchange-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const token = data.access_token;
+
+      browser.runtime.sendMessage({
+        type: "GITHUB_OAUTH_TOKEN",
+        token: token
+      }).then((response) => {
+        console.log("📬 Token sent and stored:", response);
+        document.body.innerHTML = `<h2>✅ Token sent to extension</h2>`;
+        setTimeout(() => window.close(), 2000);
+      });
+    })
+    .catch(err => {
+      console.error("❌ Token exchange failed", err);
+      document.body.innerHTML = `<h2>❌ Token exchange failed</h2>`;
+    });
+}
