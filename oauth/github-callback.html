@@ -1,23 +1,46 @@
-<script>
-  const params = new URLSearchParams(location.search);
-  const code = params.get("code");
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GitHub Callback</title>
+  </head>
+  <body>
+    <h2>Processing GitHub login...</h2>
 
-  if (code) {
-    fetch("https://75f2-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.body.innerHTML = `<h2>✅ Access Token: ${data.access_token}</h2>`;
-      // You can store it to use in extension later
-    })
-    .catch(err => {
-      console.error("❌ Error in fetch:", err);
-      document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
-    });
-  } else {
-    document.body.innerHTML = `<h2>❌ No Code Found</h2>`;
-  }
-</script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const code = params.get("code");
+
+      if (code) {
+        fetch("https://75f2-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        })
+        .then(res => res.json())
+        .then(data => {
+          const token = data.access_token;
+
+          document.body.innerHTML = `<h2>✅ Access Token Received</h2>`;
+
+          // ✅ Send access token to Firefox extension popup
+          window.opener.postMessage(
+            {
+              type: "GITHUB_OAUTH_SUCCESS",
+              token: token
+            },
+            "*"
+          );
+
+          // Optional: Close the popup window after sending
+          setTimeout(() => window.close(), 1500);
+        })
+        .catch(err => {
+          console.error("Token exchange failed:", err);
+          document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
+        });
+      } else {
+        document.body.innerHTML = `<h2>❌ No code found in URL</h2>`;
+      }
+    </script>
+  </body>
+</html>
