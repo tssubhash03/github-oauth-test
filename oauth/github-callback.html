@@ -33,7 +33,7 @@
         if (code) {
             bodyContent.innerHTML = '<h2>Exchanging code for token...</h2>'; // Show loading message
 
-            fetch("https://75f2-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
+            fetch("http://localhost:4000/exchange-code", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code }),
