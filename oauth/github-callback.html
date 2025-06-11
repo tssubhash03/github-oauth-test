@@ -1,42 +1,20 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>GitHub Callback</title>
-  </head>
-  <body>
-    <h2>Processing...</h2>
+<script>
+  const params = new URLSearchParams(location.search);
+  const code = params.get("code");
 
-    <script>
-      const params = new URLSearchParams(location.search);
-      const code = params.get("code");
-
-      if (code) {
-        fetch("https://62a8-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
-        })
-        .then(res => res.json())
-        .then(data => {
-          const token = data.access_token;
-
-          document.body.innerHTML = `<h2>✅ Access Token Received</h2>`;
-
-          // 🔁 Send token to extension using window.postMessage
-          window.opener.postMessage({
-            type: "GITHUB_OAUTH_SUCCESS",
-            token: token
-          }, "*");
-
-          // Optional: close this window after a few seconds
-          setTimeout(() => window.close(), 2000);
-        })
-        .catch(err => {
-          document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
-        });
-      } else {
-        document.body.innerHTML = `<h2>❌ No Code Found</h2>`;
-      }
-    </script>
-  </body>
-</html>
+  if (code) {
+    fetch("https://62a8-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.body.innerHTML = `<h2>✅ Access Token: ${data.access_token}</h2>`;
+      // You can store it to use in extension later
+    })
+    .catch(err => {
+      document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
+    });
+  }
+</script>
