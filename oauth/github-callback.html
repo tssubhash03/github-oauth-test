@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
-<head><title>GitHub Callback</title></head>
-<body>
-  <p>Authorizing...</p>
-  <script>
-    const code = new URLSearchParams(window.location.search).get("code");
-    if (code) {
-      window.opener.postMessage({ type: "GITHUB_AUTH_CODE", code }, "*");
-      window.close();
-    }
-  </script>
-</body>
+  <head><title>OAuth Callback</title></head>
+  <body>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const code = params.get("code");
+      document.body.innerHTML = code 
+        ? `<h2>✅ Success! Code: ${code}</h2>` 
+        : `<h2>❌ Failed</h2>`;
+    </script>
+  </body>
 </html>
