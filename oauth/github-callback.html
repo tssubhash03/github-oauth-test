@@ -10,21 +10,11 @@
     })
     .then(res => res.json())
     .then(data => {
-      const token = data.access_token;
-      document.body.innerHTML = "<h2>Access Token Exchange ${token}</h2>";
-      if (token) {
-        // Replace <YOUR_UUID> with your actual extension UUID
-        const extensionURL = "moz-extension://6d63a163-e96f-461a-ad9a-b3acb033ccd0/popup/popup.html?token=" + token;
-        window.location.href = extensionURL;
-      } else {
-        document.body.innerHTML = "<h2>❌ Token Exchange Failed (No token)</h2>";
-      }
+      document.body.innerHTML = `<h2>✅ Access Token: ${data.access_token}</h2>`;
+      // You can store it to use in extension later
     })
     .catch(err => {
-      document.body.innerHTML = "<h2>❌ Token Exchange Failed</h2>";
-      console.error(err);
+      document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
     });
-  } else {
-    document.body.innerHTML = "<h2>❌ No code in URL</h2>";
   }
 </script>
