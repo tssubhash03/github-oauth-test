@@ -1,46 +1,78 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>GitHub Callback</title>
-  </head>
-  <body>
-    <h2>Processing GitHub login...</h2>
-
+<head>
+    <title>GitHub OAuth Callback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        h2 {
+            color: #28a745; /* Green for success */
+        }
+        .error-message {
+            color: #cb2431; /* Red for error */
+        }
+        .info-message {
+            font-size: 1.1em;
+            margin-top: 20px;
+            color: #586069;
+        }
+    </style>
     <script>
-      const params = new URLSearchParams(location.search);
-      const code = params.get("code");
+        // Declare window.githubAccessToken globally
+        window.githubAccessToken = null;
 
-      if (code) {
-        fetch("https://75f2-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
-        })
-        .then(res => res.json())
-        .then(data => {
-          const token = data.access_token;
+        const params = new URLSearchParams(location.search);
+        const code = params.get("code");
+        const bodyContent = document.body; // Reference to the body to update messages
 
-          document.body.innerHTML = `<h2>✅ Access Token Received</h2>`;
+        if (code) {
+            bodyContent.innerHTML = '<h2>Exchanging code for token...</h2>'; // Show loading message
 
-          // ✅ Send access token to Firefox extension popup
-          window.opener.postMessage(
-            {
-              type: "GITHUB_OAUTH_SUCCESS",
-              token: token
-            },
-            "*"
-          );
+            fetch("https://62a8-2401-4900-93d1-109b-5400-74ca-6e49-16be.ngrok-free.app/exchange-code", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code }),
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.access_token) {
+                    // *** THIS IS THE CRUCIAL LINE ***
+                    // Make the received token available to the content script
+                    window.githubAccessToken = data.access_token;
 
-          // Optional: Close the popup window after sending
-          setTimeout(() => window.close(), 1500);
-        })
-        .catch(err => {
-          console.error("Token exchange failed:", err);
-          document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
-        });
-      } else {
-        document.body.innerHTML = `<h2>❌ No code found in URL</h2>`;
-      }
+                    console.log("✅ Callback page received access token (partial):", data.access_token.substring(0, 10) + '...');
+                    bodyContent.innerHTML = `<h2>✅ Authentication Successful!</h2>
+                                             <p class="info-message">You can now close this tab. The extension has received your token.</p>`;
+                    // Optional: Automatically close the tab after a short delay
+                    // setTimeout(() => window.close(), 1500);
+
+                } else {
+                    bodyContent.innerHTML = `<h2 class="error-message">❌ Token Exchange Failed: No access_token received.</h2>`;
+                    console.error("❌ Token Exchange Failed: No access_token in response data.");
+                }
+            })
+            .catch(err => {
+                console.error("❌ Error during token exchange:", err);
+                bodyContent.innerHTML = `<h2 class="error-message">❌ Token Exchange Failed</h2>
+                                         <p class="error-message">Details: ${err.message}</p>
+                                         <p class="info-message">Please try authenticating again.</p>`;
+            });
+        } else {
+            bodyContent.innerHTML = `<h2 class="error-message">❌ No Authorization Code Found</h2>
+                                     <p class="info-message">It looks like something went wrong during the GitHub authorization process. Please try again from the extension.</p>`;
+        }
     </script>
-  </body>
+</head>
+<body>
+    </body>
 </html>
