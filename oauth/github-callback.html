@@ -14,7 +14,10 @@
       // You can store it to use in extension later
     })
     .catch(err => {
+      console.error("❌ Error in fetch:", err);
       document.body.innerHTML = `<h2>❌ Token Exchange Failed</h2>`;
     });
+  } else {
+    document.body.innerHTML = `<h2>❌ No Code Found</h2>`;
   }
 </script>
