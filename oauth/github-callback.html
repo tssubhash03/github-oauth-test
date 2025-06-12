@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>GitHub Auth Callback</title>
+  <!-- ✅ Required for browser.runtime in normal tab -->
   <script src="https://unpkg.com/webextension-polyfill@0.10.0/dist/browser-polyfill.min.js"></script>
-
 </head>
 <body>
   <h2>Authenticating with GitHub...</h2>
@@ -13,7 +13,6 @@
     const code = urlParams.get("code");
 
     if (code) {
-      // Exchange code with your server to get token
       fetch("http://localhost:4000/exchange-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,22 +22,26 @@
       .then(data => {
         const token = data.access_token;
 
-        // ✅ Send token to extension background
-        browser.runtime.sendMessage({
+        if (!token) {
+          throw new Error("No token returned from server");
+        }
+
+        // ✅ Send token to background script
+        return browser.runtime.sendMessage({
           type: "GITHUB_TOKEN",
           token: token
-        }).then(response => {
-          document.body.innerHTML = "<h3>✅ Token stored. You can close this tab.</h3>";
-          console.log("✔️ Sent to extension:", response);
-        }).catch(err => {
-          console.error("❌ Failed to send token:", err);
         });
-      }).catch(err => {
+      })
+      .then(response => {
+        document.body.innerHTML = "<h3>✅ Token stored. You can close this tab.</h3>";
+        console.log("✔️ Token sent to extension:", response);
+      })
+      .catch(err => {
         document.body.innerHTML = "<h3>❌ Token exchange failed.</h3>";
-        console.error(err);
+        console.error("❌", err);
       });
     } else {
-      document.body.innerHTML = "<h3>❌ No code received.</h3>";
+      document.body.innerHTML = "<h3>❌ No code received in callback.</h3>";
     }
   </script>
 </body>
