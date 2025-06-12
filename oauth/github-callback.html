@@ -22,26 +22,9 @@
       .then(data => {
           document.body.innerHTML = "<h2>✅ Access Token ${data.access_token}</h2>";
         const token = data.access_token;
+      }}
 
-        // 📨 2. Send token to extension via runtime messaging
-        browser.runtime.sendMessage({
-          type: "GITHUB_OAUTH_TOKEN",
-          token: token
-        }).then(() => {
-          document.body.innerHTML = "<h2>✅ Token sent to extension</h2>";
-          setTimeout(() => window.close(), 2000); // ✅ 3. Close tab after success
-        }).catch(err => {
-          document.body.innerHTML = "<h2>❌ Failed to send token</h2>";
-          console.error(err);
-        });
-      })
-      .catch(err => {
-        document.body.innerHTML = "<h2>❌ Token exchange failed</h2>";
-        console.error("Exchange error:", err);
-      });
-    } else {
-      document.body.innerHTML = "<h2>❌ No code found in URL</h2>";
-    }
+        // 📨 2. Send token to extension via runtime messagin
   </script>
 </body>
 </html>
